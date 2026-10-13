@@ -9,7 +9,7 @@ mod draw;
 const GRAVITY: f32 = 160.0;
 const START_SPEED: f32 = 30.0;
 const FIRST_SPAWN: f32 = 1.5;
-const JUMP_VELOCITY: f32 = 55.0;
+const JUMP_VELOCITY: f32 = 50.0;
 
 const PLAYER_X: f32 = 5.0;      // fixed column the crab sits at
 const PLAYER_W: f32 = 6.0;      // hitbox width (a bit narrower than the art)

@@ -13,20 +13,17 @@ const URCHIN_COLOR: Color = Color::Rgb { r: 120, g: 70,  b: 200 };  // purple
 const CLAM_COLOR:   Color = Color::Rgb { r: 230, g: 210, b: 170 };  // sand
 
 // Crabs sextant art
-const CRAB_A: [&str; 4] = [
-    "🬻🬲█🬓     🬦█🬷🬺",   // claws open
-    "🬁🬬🬕 🬉▌ ▐🬄 🬨🬝🬀",   // arms + eye stalks
-    " 🬞🬸🬹🬹🬺🬹🬻🬹🬹🬴🬏 ",   // shell
-    " 🬘🬡🬆🬙🬂🬂🬂🬥🬊🬒🬣 ",   // legs out
+const CRAB_A: [&str; 3] = [
+    "🬪🬄🬞 🬏🬉🬜",   // claws open + eye stalks
+    " 🬶🬻🬹🬺🬳 ",   // shell
+    "🬖🬙🬂🬂🬂🬥🬢",   // legs out
 ];
 
-const CRAB_B: [&str; 4] = [
-    "🬻█🬺🬏     🬞🬻█🬺",   // claws closed
-    "🬁🬬🬕 🬉▌ ▐🬄 🬨🬝🬀",
-    " 🬞🬸🬹🬹🬺🬹🬻🬹🬹🬴🬏 ",
-    " 🬤🬊🬒🬥🬂🬂🬂🬙🬡🬆🬗 ",   // legs in
+const CRAB_B: [&str; 3] = [
+    "🬫🬄🬞 🬏🬉🬛",   // claws closed
+    " 🬶🬻🬹🬺🬳 ",
+    " 🬥🬥🬂🬙🬙 ",   // legs in
 ];
-
 // Obstacles Sextant Art
 // tall (2 rows)
 const KELP:   [&str; 2] = ["🬠🬃🬗", "🬈🬯🬢"];          // 3 wide, wavy fronds
