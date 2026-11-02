@@ -1,9 +1,11 @@
 use super::{Game, Kind};
-use crossterm::{execute, queue, cursor::MoveTo, style::Print, terminal::{Clear, ClearType}};
+use crossterm::{queue, cursor::MoveTo, style::Print, terminal::{Clear, ClearType}};
 use crossterm::style::{Color, ResetColor, SetForegroundColor};
 use std::io::Write;
 
-const GROUND: &str = "_____._______-__..____________,______-________,,_____";
+// Line sits at the TOP of the ground row (sextant pixels), so feet and obstacles touch it.
+// Specks under the line are pebbles, so you can see the ground scroll.
+const GROUND: &str = "🬂🬂🬂🬂🬂🬒🬂🬂🬂🬂🬂🬂🬂🬊🬂🬂🬒🬒🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬡🬂🬂🬂🬂🬂🬂🬊🬂🬂🬂🬂🬂🬂🬂🬂🬡🬡🬂🬂🬂🬂🬂";
 
 const CRAB_COLOR: Color = Color::Rgb { r: 247, g: 76, b: 0 };
 
@@ -25,13 +27,13 @@ const CRAB_B: [&str; 3] = [
     " 🬥🬥🬂🬙🬙 ",   // legs in
 ];
 // Obstacles Sextant Art
-// tall (2 rows)
-const KELP:   [&str; 2] = ["🬠🬃🬗", "🬈🬯🬢"];          // 3 wide, wavy fronds
-const CORAL:  [&str; 2] = ["🬣▌🬜", "🬞█🬐"];          // 3 wide, branching
-const URCHIN: [&str; 2] = ["🬈🬷🬲🬅", "🬡██🬒"];       // 4 wide, spiky ball
+// tall (3 rows)
+const KELP:   [&str; 3] = ["🬖🬞🬃", "🬠🬃🬗", "🬈🬯🬢"];          // 3 wide, wavy fronds
+const CORAL:  [&str; 3] = ["🬏🬓🬞", "🬣▌🬜", "🬞█🬐"];          // 3 wide, branching
+const URCHIN: [&str; 3] = ["🬏🬦🬓🬞", "🬈🬷🬲🬅", "🬡██🬒"];       // 4 wide, spiky ball
 
-// low (1 row)
-const CLAM:   [&str; 1] = ["🬵🬴🬸🬱"];               // 4 wide, shell
+// low (2 rows)
+const CLAM:   [&str; 2] = [" 🬵🬱 ", "🬻🬶🬳🬺"];               // 4 wide, shell
 
 impl Game {
     pub fn draw(&self, out: &mut impl Write, x: u16, y: u16, w: u16, h: u16) -> std::io::Result<()>{ 
@@ -65,23 +67,26 @@ impl Game {
 
         for o in &self.obstacles {
             let (rows, color) = obstacle_sprite(o.kind);
-            let col = o.x.round() as i32;
+            // obstacles and ground both snap with the same floor, so they step on the same frame
+            let col = o.x as i32 - self.ground_offset as i32;
             let width = o.kind.size().0;
-            if col < 0 || col + width > w as i32 {
-                continue;                          // partly off-screen: skip it
+            // clip to the screen so obstacles slide in and out instead of popping
+            let skip = (-col).max(0);                      // cells hidden past the left edge
+            let take = (w as i32 - col).min(width) - skip; // cells left that fit on screen
+            if take <= 0 {
+                continue;
             }
             let top = ground_row as i32 - rows.len() as i32;   // bottom row sits on the ground
             for (i, row) in rows.iter().enumerate() {
+                let visible: String = row.chars().skip(skip as usize).take(take as usize).collect();
                 queue!(out,
-                    MoveTo(x + col as u16, (top + i as i32) as u16),
+                    MoveTo(x + (col + skip) as u16, (top + i as i32) as u16),
                     SetForegroundColor(color),
-                    Print(row),
+                    Print(visible),
                     ResetColor,
                 )?;
-            
-        
+            }
         }
-    }
 
 
 
