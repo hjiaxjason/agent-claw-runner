@@ -8,8 +8,10 @@ mod draw;
 
 const GRAVITY: f32 = 160.0;
 const START_SPEED: f32 = 30.0;
+const MAX_SPEED: f32 = 1000.0;
+const ACCEL: f32 = 0.35;
 const FIRST_SPAWN: f32 = 1.5;
-const JUMP_VELOCITY: f32 = 50.0;
+const JUMP_VELOCITY: f32 = 37.5;
 
 const PLAYER_X: f32 = 5.0;      // fixed column the crab sits at
 const PLAYER_W: f32 = 6.0;      // hitbox width (a bit narrower than the art)
@@ -23,7 +25,7 @@ pub struct Player {
 pub enum Kind { Kelp, Coral, Urchin, Clam }
 
 pub struct Obstacle {
-    x: f32,
+    x: f32, // world column, same ruler as ground_offset (screen column = x - ground_offset)
     kind: Kind,
 }
 
@@ -46,9 +48,9 @@ pub struct Game {
 impl Kind {
     fn size(self) -> (i32, i32) {
         match self {
-            Kind::Kelp | Kind::Coral => (3, 2),
-            Kind::Urchin => (4, 2),
-            Kind::Clam => (4, 1),
+            Kind::Kelp | Kind::Coral => (3, 3),
+            Kind::Urchin => (4, 3),
+            Kind::Clam => (4, 2),
         }
     }
 }
@@ -76,6 +78,7 @@ impl Game {
 
     pub fn update(&mut self, dt: f32) {
         let p = &mut self.player;
+        self.speed = (self.speed + ACCEL * dt).min(MAX_SPEED);
         p.vy -= GRAVITY * dt;
         p.y += p.vy * dt;
         if p.y <= 0.0 {
@@ -93,14 +96,14 @@ impl Game {
                 2 => Kind::Urchin,
                 _ => Kind::Clam,
             };
-            self.obstacles.push(Obstacle {x : self.width, kind });
+            // spawn on a whole world column so it snaps to cells together with the ground
+            let x = self.ground_offset.floor() + self.width;
+            self.obstacles.push(Obstacle { x, kind });
             self.spawn_timer = rng.random_range(MIN_GAP..MAX_GAP);
 
         }
 
-        for o in &mut self.obstacles {
-            o.x -= self.speed * dt;
-        }
-        self.obstacles.retain(|o| o.x + o.kind.size().0 as f32 > 0.0);
+        let scroll = self.ground_offset;
+        self.obstacles.retain(|o| o.x + o.kind.size().0 as f32 > scroll);
     }
 }
